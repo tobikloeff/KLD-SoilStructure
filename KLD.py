@@ -1,10 +1,4 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 27 10:18:31 2023
-
-@author: toel0002
-"""
-
 
 
 from pandas import read_csv, DataFrame
