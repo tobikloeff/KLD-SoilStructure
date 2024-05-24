@@ -144,54 +144,6 @@ def resid_Kosugi_UM_integ(params, observed, x, resid, eff_wc=None):
 
 
 
-def fit_Kosugi_UM_integ(obs, x, sig, mu, resid, est_eff_wc=False, eff_wc=0.4):
-    """
-    Fits the model after Kosugi (1996) to observed values of for cumulative water 
-    content.
-
-    Parameters
-    ----------
-    obs : list or array-like
-        Observed values of cumulative water content to which the nonlinear model 
-        is fitted.
-    x : list or array-like
-        The values of matric potential/equivalent pore radius.
-    sig : float
-        Initial guess of the parameter sigma.
-    mu : float
-        Initial guess of the median.
-    est_eff_wc: bool
-        If this is True, the effective water content will be treated as a
-        fitting parameter. In this case the default of 0.4 is used as an initial 
-        guess. Alternatively, this guess can be defined in the next parameter.
-        The default is False.
-    eff_wc : float
-        The effective water content (i.e. the difference between the saturated 
-        and residual water content). This parameter should be specified if 
-        it is not estimated.
-        The default is 0.4.
-
-    Returns
-    -------
-    par : dict
-        A dictionary including the parameters of the fitted model.
-
-    """
-    
-    if est_eff_wc == True:
-        p_init = array([eff_wc, sig, mu])
-        p = least_squares(resid_Kosugi_UM_integ, p_init, method="lm", verbose=1, 
-                      args=(obs, x, resid))["x"]
-        par = {"eff_wc": p[0], "sigma": p[1], "median": p[2]}
-    else:         
-        p_init = array([sig, mu])    
-        p = least_squares(resid_Kosugi_UM_integ, p_init, method="lm", verbose=1, 
-                      args=(obs, x, resid, eff_wc))["x"] 
-        par = {"eff_wc": eff_wc, "sigma": p[0], "median": p[1]}
-    
-    return par
-
-
 def calculate_KL_divergence(f1, f2, par1, par2, a, b, n):
     '''
     Calculates the KL divergence numerically based on the composite 
@@ -360,14 +312,18 @@ for i in ind:
     ax.set_xlabel("Water content [cm$^{3}$ cm$^{-3}$]") 
     
     # save reference soil plot
-    fig.savefig(".../" + str(i) + ".png", dpi=70)
+    # fig.savefig(".../" + str(i) + ".png", dpi=70)
     # plt.close()
     
     
     # estimate initial parameter guesses for structured soil (based on Klöffel et al., 2022)   
-    p_tex_UM = fit_Kosugi_UM_integ(y_tex, x_tex, 1, 0.1, 0, eff_wc=100)
-    med_ref = 0.816 * p_tex_UM["median"] * sqrt((0.30/(1 - 0.30)))
-    sig_ref = p_tex_UM["sigma"]
+    params = Parameters()
+    params.add("sig1", value=1, min=0, max=10)
+    params.add("med1", value=0.1, min=0, max=1)
+    result = minimize(resid_Kosugi_UM_integ, params, args=(y_tex, x_tex, 0, 100), method='leastsq')            
+    p_ref = [result.params["sig1"].value, result.params["med1"].value]
+    med_ref = 0.816 * p_ref[1] * sqrt((0.30/(1 - 0.30)))
+    sig_ref = p_ref[0]
        
     # define initial parameter guesses and bounds (structured soil)
     params = Parameters()
@@ -398,7 +354,7 @@ for i in ind:
     ax.set_xlabel("Water content [cm$^{3}$ cm$^{-3}$]") 
     
     # save structured soil plot
-    fig.savefig(".../" + str(i) + ".png", dpi=70)
+    # fig.savefig(".../" + str(i) + ".png", dpi=70)
     # plt.close()
     
     
