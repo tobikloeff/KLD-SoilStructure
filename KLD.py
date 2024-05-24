@@ -8,7 +8,6 @@ from lmfit import minimize, Parameters
 from sklearn.metrics import mean_squared_error
 from scipy.special import erfc
 from soiltexture import getTexture
-from scipy.optimize import least_squares
 
 
 
