@@ -320,9 +320,9 @@ for i in ind:
     params.add("sig1", value=1, min=0, max=10)
     params.add("med1", value=0.1, min=0, max=1)
     result = minimize(resid_Kosugi_UM_integ, params, args=(y_tex, x_tex, 0, 100), method='leastsq')            
-    p_ref = [result.params["sig1"].value, result.params["med1"].value]
-    med_ref = 0.816 * p_ref[1] * sqrt((0.30/(1 - 0.30)))
-    sig_ref = p_ref[0]
+    p_ref_est = [result.params["sig1"].value, result.params["med1"].value]
+    med_ref = 0.816 * p_ref_est[1] * sqrt((0.30/(1 - 0.30)))
+    sig_ref = p_ref_est[0]
        
     # define initial parameter guesses and bounds (structured soil)
     params = Parameters()
@@ -358,5 +358,5 @@ for i in ind:
     
     
     # Calculate KLD value numerically (trapezoidal rule)
-    KLD = calculate_KL_divergence(Kosugi_BM_pdf, Kosugi_BM_pdf, p_wr, p_ref, 0.149/(15000/0.981), 0.149, 1e7)
+    KLD = calculate_KL_divergence(Kosugi_BM_pdf, Kosugi_BM_pdf, p_wr, p_ref, 0.149/(15000/0.981), 0.149, int(1e7))
     KLD_dic[i] = KLD
